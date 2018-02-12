@@ -9,14 +9,19 @@ Vagrant.configure("2") do |config|
     maas.vm.hostname = "pxe-server"
     maas.vm.synced_folder '.', '/vagrant', disabled: true
     maas.vm.network "private_network", ip: "192.168.0.254", virtualbox__intnet: "pxe_network"
-    maas.vm.network "forwarded_port", guest: 8080, host: 8080, auto_correct: true
-    maas.vm.network "forwarded_port", guest: 8000, host: 8000, auto_correct: true
+    maas.vm.network "forwarded_port", guest: 5240, host: 5240, auto_correct: true
     maas.ssh.forward_agent = true
 
     maas.vm.provider :virtualbox do |vb|
-      vb.memory = '1024'
-      vb.cpus = '1'
+      vb.memory = '8024'
+      vb.cpus = '2'
     end
+    maas.vm.provision "shell", inline: <<-SHELL
+      sudo apt-get update -y
+      sudo apt-add-repository -yu ppa:maas/stable
+      sudo apt install maas -y
+      sudo maas createadmin --username root --password=root --email contact@example.com
+    SHELL
   end
 
   config.vm.define :blank_server do |blank_server|
